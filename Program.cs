@@ -1,4 +1,20 @@
+using LojinhaDaPaulinha.Data;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
+
+// Dependency Injection here
+
+builder.Services.AddDbContext<DataContext>(cfg =>
+{
+    cfg.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+});
+
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+
+
+
+
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
