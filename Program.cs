@@ -11,6 +11,7 @@ builder.Services.AddDbContext<DataContext>(cfg =>
 });
 
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 
 
 

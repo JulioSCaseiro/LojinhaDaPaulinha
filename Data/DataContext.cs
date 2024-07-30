@@ -8,6 +8,8 @@
 
         public DbSet<Newsletter> Newsletters { get; set; }
 
+        public DbSet<Category> Categories { get; set; }
+
         public DataContext(DbContextOptions<DataContext> options) : base(options)
         {
         }
