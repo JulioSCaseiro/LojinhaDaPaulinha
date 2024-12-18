@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using LojinhaDaPaulinha.Services.Api;
 using LojinhaDaPaulinha.Services.Data;
+using System.Net;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,16 +33,27 @@ builder.Services.AddScoped<IIdentityManager, IdentityManager>();
 builder.Services.AddScoped<IDataUnit, DataUnit>();
 builder.Services.AddScoped<ApiService>();
 builder.Services.AddScoped<DataService>();
-
+builder.Services.AddSingleton<ApiService>();
+builder.Services.AddHttpClient("ApiClient", client =>
+{
+    client.BaseAddress = new Uri("http://localhost:5076");
+})
+.ConfigurePrimaryHttpMessageHandler(() =>
+{
+    return new HttpClientHandler
+    {
+        AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
+    };
+});
 
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 
 
-
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
 
 var app = builder.Build();
 
@@ -54,6 +66,7 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
 app.UseStaticFiles();
 
 app.UseRouting();

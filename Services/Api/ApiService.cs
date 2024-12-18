@@ -1,4 +1,5 @@
-﻿using System.Net.Http.Headers;
+﻿using System.Net.Http;
+using System.Net.Http.Headers;
 
 namespace LojinhaDaPaulinha.Services.Api
 {
@@ -7,36 +8,71 @@ namespace LojinhaDaPaulinha.Services.Api
         private readonly HttpClient _httpClient;
         private readonly string _apiBaseAddress;
 
-        public ApiService(IConfiguration configuration)
+        public ApiService(IHttpClientFactory httpClientFactory, IConfiguration configuration)
         {
-            _httpClient = new HttpClient();
-            _apiBaseAddress = configuration["Api:BaseAddress"];
+            _httpClient = httpClientFactory.CreateClient();
+            _apiBaseAddress = configuration["ApiSettings:BaseUrl"];
+            Console.WriteLine($"BaseAddress: {_apiBaseAddress}");
 
             ApiServiceConfiguration();
         }
 
-        private void ApiServiceConfiguration()
+        private void ApiServiceConfiguration(string token = null)
         {
             // Headers.
             _httpClient.DefaultRequestHeaders.Accept.Clear();
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
+            // Add Authorization header if a token is provided.
+            if (!string.IsNullOrWhiteSpace(token))
+            {
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            }
+
             // Set timeout for the request.
             _httpClient.Timeout = TimeSpan.FromSeconds(30);
         }
 
-        public async Task<ApiResponse> GetDataAsync(string apiEndpoint)
+        public async Task<ApiResponse> GetDataAsync(string apiEndpoint, string token = null)
         {
+            if (!string.IsNullOrWhiteSpace(token))
+            {
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            }
+
             HttpResponseMessage httpResponseMessage;
 
             // Try Get.
             try
             {
-                httpResponseMessage = await _httpClient.GetAsync(_apiBaseAddress + apiEndpoint);
+                // Add token to the Authorization header if provided
+                if (!string.IsNullOrWhiteSpace(token))
+                {
+                    _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                }
+                    httpResponseMessage = await _httpClient.GetAsync(_apiBaseAddress + apiEndpoint);
             }
-            catch
+            catch (HttpRequestException ex)
             {
-                return ApiErrorResponse.ApiCallFailed;
+                // Log and return a failure response for HTTP-related exceptions
+                Console.WriteLine($"HTTP Request Error: {ex.Message}");
+                return new ApiResponse
+                {
+                    IsSuccess = false,
+                    StatusCode = 500,
+                    Content = $"HTTP Request Error: {ex.Message}"
+                };
+            }
+            catch (Exception ex)
+            {
+                // Handle unexpected errors
+                Console.WriteLine($"Unexpected Error: {ex.Message}");
+                return new ApiResponse
+                {
+                    IsSuccess = false,
+                    StatusCode = 500,
+                    Content = $"Unexpected Error: {ex.Message}"
+                };
             }
 
             return new ApiResponse

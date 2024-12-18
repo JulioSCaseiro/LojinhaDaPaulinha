@@ -25,9 +25,15 @@ namespace LojinhaDaPaulinha.Controllers
         // GET: Products
         public async Task<IActionResult> Index()
         {
-            var getAll = await _dataService.GetAsync<IEnumerable<IndexRowProductViewModel>>(ApiUrls.GetAllProducts);
-
-            return ManageGetDataResponse<IEnumerable<IndexRowProductViewModel>>(getAll);
+            try 
+            {
+                var getAll = await _dataService.GetAsync<IEnumerable<IndexRowProductViewModel>>(ApiUrls.GetAllProducts);
+                return ManageGetDataResponse<IEnumerable<IndexRowProductViewModel>>(getAll);
+            }
+            catch (HttpRequestException ex)
+            {
+                return View("Error");
+            }
         }
 
 

@@ -18,6 +18,11 @@ namespace LojinhaDaPaulinha.Services.Data
         {
             var apiResponse = await _apiService.GetDataAsync(url + value);
 
+            if (!apiResponse.IsSuccess)
+            {
+                Console.WriteLine($"API Call Failed. Status Code: {apiResponse.StatusCode}");
+                Console.WriteLine($"Response Content: {apiResponse.Content}");
+            }
             if (apiResponse.IsSuccess)
             {
                 try
