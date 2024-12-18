@@ -1,11 +1,11 @@
 ﻿namespace LojinhaDaPaulinha.Data
 {
     using LojinhaDaPaulinha.Data.Entities;
+    using LojinhaDaPaulinha.Data.Identity;
+    using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore;
-    public class DataContext : DbContext
+    public class DataContext : IdentityDbContext<AppUser>
     {
-        public DbSet<Product> Products { get; set; }
-
         public DbSet<Newsletter> Newsletters { get; set; }
 
         public DbSet<Category> Categories { get; set; }

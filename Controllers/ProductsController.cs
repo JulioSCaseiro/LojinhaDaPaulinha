@@ -1,141 +1,113 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using LojinhaDaPaulinha.Models.Entities.Product;
+using LojinhaDaPaulinha.Services.Api;
+using LojinhaDaPaulinha.Services.Data;
+using LojinhaDaPaulinha.Utils;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using LojinhaDaPaulinha.Data;
-using LojinhaDaPaulinha.Data.Entities;
 
 namespace LojinhaDaPaulinha.Controllers
 {
-    public class ProductsController : Controller
+    public class ProductsController : AppController
     {
-        private readonly IProductRepository _productRepository;
+        private readonly DataService _dataService;
 
-        public ProductsController(IProductRepository productRepository)
+        protected override async Task GetInputCombos()
         {
-            _productRepository = productRepository;
+            // This entity doesn't need Input Combos.
+            await Task.CompletedTask;
         }
+
+        public ProductsController(DataService dataService)
+        {
+            _dataService = dataService;
+        }
+
 
         // GET: Products
         public async Task<IActionResult> Index()
         {
-            // Call GetAll method from Generic Repository (Collects all the saved objects in the Db)
-            return View( _productRepository.GetAll());
+            var getAll = await _dataService.GetAsync<IEnumerable<IndexRowProductViewModel>>(ApiUrls.GetAllProducts);
+
+            return ManageGetDataResponse<IEnumerable<IndexRowProductViewModel>>(getAll);
         }
 
-        // GET: Products/Details/5
-        public async Task<IActionResult> Details(int? id)
+
+        // GET: Products/5
+        public async Task<IActionResult> Details(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            // Check given ID is valid.
+            if (id < 1) return IdIsNotValid(EntityNames.Product);
 
-            // Call GetByIdAsync method from Generic Repository
-            var product = await _productRepository.GetByIdAsync(id.Value);
-            if (product == null)
-            {
-                return NotFound();
-            }
+            // Try get model.
+            var getModel = await _dataService.GetAsync<DisplayProductViewModel>(ApiUrls.GetProductDisplay, id);
 
-            return View(product);
+            // Resolve response.
+            return ManageGetDataResponse<DisplayProductViewModel>(getModel);
         }
+
 
         // GET: Products/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            return View();
+            return await ViewInput(null);
         }
 
         // POST: Products/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Product product)
+        public async Task<IActionResult> Create(CreateProductViewModel model)
         {
-            if (ModelState.IsValid)
-            {
-                //Call method CreateAsync (From Generic Repository) with product object
-                await _productRepository.CreateAsync(product);
-                // No need to add "await SaveAllAsync();" because it's already called in the GenericRepository Create Method
-                return RedirectToAction(nameof(Index));
-            }
-            return View(product);
+            if (!ModelState.IsValid)
+                return await ModelStateInvalid(model, EntityNames.Product);
+
+            // Try create Product.
+            var create = await _dataService.CreateAsync(ApiUrls.CreateProduct, model);
+
+            // Resolve response.
+            return ManageInputResponse(create);
         }
 
         // GET: Products/Edit/5
         public async Task<IActionResult> Edit(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            // Check given ID is valid.
+            if (id < 1) return IdIsNotValid(EntityNames.Product);
 
-            // Call GetByIdAsync method from Generic Repository
-            var product = await _productRepository.GetByIdAsync(id);
-            if (product == null)
-            {
-                return NotFound();
-            }
-            return View(product);
+            // Try to get model.
+            var getModel = await _dataService.GetAsync<EditProductViewModel>(ApiUrls.GetProductEditModel, id);
+
+            // Resolve response.
+            return ManageGetDataResponse<EditProductViewModel>(getModel);
         }
 
         // POST: Products/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Product product)
+        public async Task<IActionResult> Edit(EditProductViewModel model)
         {
-            if (id != product.Id)
-            {
-                return NotFound();
-            }
+            // Check given ID is valid.
+            if (model.Id < 1) return IdIsNotValid(EntityNames.Product);
 
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    // Call UpdateAsync method from GenericRepository with object category
-                    await _productRepository.UpdateAsync(product);
-                    // No need to add "await SaveAllAsync();" because it's already called in the GenericRepository Update Method
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (! await _productRepository.ExistAsync(product.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(product);
+            if (!ModelState.IsValid)
+                return await ModelStateInvalid(model, EntityNames.Product);
+
+            // Try update Product.
+            var update = await _dataService.UpdateAsync(ApiUrls.UpdateProduct, model);
+
+            // Resolve response.
+            return ManageInputResponse(update);
         }
 
+
         // GET: Products/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id < 1) return IdIsNotValid(EntityNames.Product);
 
-            // Call GetByIdAsync method from Generic Repository
-            var product = await _productRepository.GetByIdAsync(id.Value);
-            if (product == null)
-            {
-                return NotFound();
-            }
+            // Try get Model.
+            var getModel = await _dataService.GetAsync<DisplayProductViewModel>(ApiUrls.GetProductDisplay, id);
 
-            return View(product);
+            // Resolve response.
+            return ManageGetDataResponse<DisplayProductViewModel>(getModel);
         }
 
         // POST: Products/Delete/5
@@ -143,14 +115,14 @@ namespace LojinhaDaPaulinha.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var product = await _productRepository.GetByIdAsync(id);
-            if (product != null)
-            {
-                // Call DeleteAsync method from Generic Repository
-                await _productRepository.DeleteAsync(product);
-                // No need to add "await SaveAllAsync();" because it's already called in the GenericRepository Delete Method
-            }
-            return RedirectToAction(nameof(Index));
+            // Check given ID is valid.
+            if (id < 1) return IdIsNotValid(EntityNames.Product);
+
+            // Try delete Product.
+            var delete = await _dataService.DeleteAsync(ApiUrls.DeleteProduct, id);
+
+            // Resolve response.
+            return ManageDeleteResponse(delete);
         }
     }
 }

@@ -1,0 +1,52 @@
+﻿@model IEnumerable<LojinhaDaPaulinha.Models.Entities.User.UserViewModel>
+
+@{
+    ViewData["Title"] = "Users";
+}
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap4.min.css" />
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h1 class="panel-title">Users</h1>
+                <p>
+                    <a asp-action="Create" class="btn btn-success"><i class="fa fa-user-plus"></i> Add User</a>
+                </p>
+            </div>
+            <div class="panel-body">
+                <table class="table table-hover" id="MyTable">
+                    <thead>
+                        <tr>
+                            <th><!-- icon --></th>
+                            <th>@Html.DisplayNameFor(model => model.UserName)</th>
+                            <th>@Html.DisplayNameFor(model => model.Role)</th>
+                            <th><!-- actions --></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td><i class="fa fa-user"></i></td>
+                                <td id="username-@item.Id">@Html.DisplayFor(modelItem => item.UserName)</td>
+                                <td id="role-@item.Id">@Html.DisplayFor(modelItem => item.Role)</td>
+                                <td>
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary"><i class="fa fa-user-pen"></i></a>
+                                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger"><i class="fa fa-user-minus"></i></a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("Scripts/_DataTablesScriptsPartial");
+    }
+}

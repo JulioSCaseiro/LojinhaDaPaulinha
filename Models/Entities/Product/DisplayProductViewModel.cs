@@ -1,6 +1,6 @@
-﻿namespace LojinhaDaPaulinha.Data.Entities
+﻿namespace LojinhaDaPaulinha.Models.Entities.Product
 {
-    public class Product : IEntity
+    public class DisplayProductViewModel
     {
         public int Id { get; set; }
 

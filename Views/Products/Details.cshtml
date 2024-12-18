@@ -1,13 +1,12 @@
-﻿@model LojinhaDaPaulinha.Data.Entities.Product
+﻿@model LojinhaDaPaulinha.Models.Entities.Product.DisplayProductViewModel
 
 @{
     ViewData["Title"] = "Details";
 }
 
-<h1>Details</h1>
+<h2><partial name="_GoBackFAIcon" /> @Model.Name</h2>
 
 <div>
-    <h4>Product</h4>
     <hr />
     <dl class="row">
         <dt class = "col-sm-2">

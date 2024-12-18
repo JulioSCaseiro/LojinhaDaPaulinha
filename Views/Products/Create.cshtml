@@ -1,15 +1,17 @@
-﻿@model LojinhaDaPaulinha.Data.Entities.Product
+﻿@model LojinhaDaPaulinha.Models.Entities.Product.CreateProductViewModel
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "New Product ";
 }
 
-<h1>Create a new Product</h1>
 <hr />
 <div class="row">
     <div class="col-md-4">
         <form asp-action="Create">
+            @* ModelState Errors *@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+
             <div class="form-group">
                 <label asp-for="Name" class="control-label"></label>
                 <input asp-for="Name" class="form-control" />
@@ -47,5 +49,7 @@
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("Scripts/_ValidationScriptsPartial");
+    }
 }
